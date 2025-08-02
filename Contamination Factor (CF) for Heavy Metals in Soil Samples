@@ -1,0 +1,69 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+# --- Data (concentration in samples and background) ---
+data = {
+    "Sample": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
+    "Zn":  [50, 67, 44, 53, 95, 31, 100, 120, 23, 36, 240, 89],
+    "Pb":  [60, 45, 19, 72, 67, 10, 39, 85, 8.3, 15, 38, 58],
+    "Hg":  [0.025, 0.035, 0.025, 0.085, 0.055, 0.025, 0.025, 0.095, 0.025, 0.025, 0.025, 0.045],
+    "Cu":  [14, 20, 13, 17, 29, 11, 25, 33, 14, 16, 71, 27],
+    "Fe":  [6100, 13200, 9400, 9800, 17800, 20000, 16000, 21000, 8800, 7600, 48000, 15400],
+    "Cr":  [11, 29, 22, 21, 42, 40, 33, 50, 17, 19, 56, 35],
+    "Ni":  [5.9, 15, 10, 11, 22, 24, 20, 30, 9.4, 8, 39, 18],
+    "Mn":  [150, 220, 175, 180, 300, 250, 280, 450, 170, 190, 610, 260]
+}
+
+background = {
+    "Zn":  [37,37,37,46,46,23,52,52,33,33,59,41],
+    "Pb":  [9,9,9,13,13,12,10,10,10,10,21,5],
+    "Hg":  [0.01,0.01,0.01,0.02,0.02,0.01,0.02,0.02,0.01,0.01,0.01,0.02],
+    "Cu":  [6,6,6,8,8,5,11,11,6,6,19,14],
+    "Fe":  [8500,8500,8500,8300,8300,16000,12800,12800,7200,7200,16500,13400],
+    "Cr":  [16,16,16,17,17,18,12,12,14,14,16,17],
+    "Ni":  [10,10,10,10,10,10,11,11,11,11,17,10],
+    "Mn":  [165,165,165,180,180,225,240,240,185,185,368,255]
+}
+
+# --- Create DataFrame ---
+df = pd.DataFrame(data)
+bg_df = pd.DataFrame(background)
+
+# --- Calculate CF (Contamination Factor) ---
+cf_df = df.copy()
+for metal in ["Zn", "Pb", "Hg", "Cu", "Fe", "Cr", "Ni", "Mn"]:
+    cf_df[metal] = df[metal] / bg_df[metal]
+
+# --- Build grouped bar chart ---
+metals = ["Zn", "Pb", "Hg", "Cu", "Fe", "Cr", "Ni", "Mn"]
+x = np.arange(len(df["Sample"]))  # positions for samples
+width = 0.1  # bar width
+
+fig, ax = plt.subplots(figsize=(16,9))
+
+# Colors for each metal
+colors = ["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f"]
+
+for i, metal in enumerate(metals):
+    ax.bar(x + i*width, cf_df[metal], width, label=metal, color=colors[i])
+
+# --- Increase font sizes and set English labels ---
+ax.set_xlabel("Soil Samples", fontsize=18, labelpad=10)
+ax.set_ylabel("Contamination Factor (CF)", fontsize=18, labelpad=10)
+ax.set_title("Contamination Factor (CF) for Heavy Metals in Soil Samples", fontsize=22, pad=20)
+
+ax.set_xticks(x + width*3.5)
+ax.set_xticklabels(df["Sample"], fontsize=16)
+
+# Increase font size for y-axis numbers
+ax.tick_params(axis='y', labelsize=16)
+
+# Legend with larger font
+ax.legend(title="Metals", title_fontsize=16, fontsize=14, bbox_to_anchor=(1.05, 1), loc='upper left')
+
+# Add grid
+ax.grid(axis='y', linestyle='--', alpha=0.7)
+
+plt.tight_layout()
+plt.show()
